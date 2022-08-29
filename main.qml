@@ -3,6 +3,7 @@ import QtQuick.Window 2.15
 import QtQuick.Controls 6.2
 
 Window {
+    id: window
     width: 640
     height: 480
     visible: true
@@ -44,11 +45,11 @@ Window {
 
     Image {
         id: gameOfLifeImage
-        x: 5
-        y: 5
-        width: 630
+        y: 4
+        width: 435
         height: 435
         source: "image://gameoflife/"
+        anchors.horizontalCenter: parent.horizontalCenter
         smooth: false
         cache: false
         fillMode: Image.PreserveAspectFit
@@ -57,6 +58,8 @@ Window {
             id: gameOfLifeMouseArea
             anchors.fill: parent
             onClicked: (mouse)=> {
+                           console.log("Sending coordinates " + mouse.x + "x" + mouse.y);
+                           gameOfLifeImage.source = "";
                            gameOfLifeImage.source = "image://gameoflife/p" + mouse.x + "x" + mouse.y;
                        }
         }
@@ -74,7 +77,33 @@ Window {
         }
     }
 
-    TextInput {
+    Slider {
+        id: sizeSlider
+        x: 171
+        y: 455
+        width: 388
+        height: 10
+        snapMode: RangeSlider.SnapOnRelease
+        stepSize: 1
+        to: 435
+        from: 1
+        value: 1
+        onMoved:
+        {
+            sizeText.text = "Size: " + this.value + "x" + this.value;
+            gameOfLifeImage.source = "image://gameoflife/s" + this.value + "x" + this.value;
+        }
+    }
+
+    Text {
+        id: sizeText
+        x: 565
+        y: 449
+        text: qsTr("Size: 1x1")
+        font.pixelSize: 12
+    }
+
+    /*TextInput {
         id: heightInput
         x: 360
         y: 450
@@ -136,5 +165,5 @@ Window {
             gameOfLifeImage.source = "";
             gameOfLifeImage.source = "image://gameoflife/p" + pointInput.text;
         }
-    }
+    }*/
 }

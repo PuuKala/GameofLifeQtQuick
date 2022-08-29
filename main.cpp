@@ -18,10 +18,7 @@ int main(int argc, char *argv[])
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
 
-    //GameOfLife game;
-    //QQmlContext *context = engine.rootContext();
-    //context->setContextProperty("gameOfLife", &game);
-    //engine.addImageProvider(QLatin1String("gameoflife"), &game);
+    // The Game of life has been implemented as an image provider
     engine.addImageProvider(QLatin1String("gameoflife"), new GameOfLife);
 
     engine.load(url);

@@ -3,7 +3,10 @@
 
 #include <QQuickImageProvider>
 #include <QBitmap>
-
+/**
+ * @brief Game of life for QtQuick GUI
+ * @details Acts as a image provider for QtQuick GUI and stores the game state. Takes commands through the given image path.
+ */
 class GameOfLife : public QQuickImageProvider
 {
 public:

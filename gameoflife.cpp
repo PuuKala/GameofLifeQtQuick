@@ -1,18 +1,30 @@
 #include "gameoflife.h"
 #include <QDebug>
 
+/**
+ * @brief Game of life constructor, initializes state to 1x1 black image.
+ */
 GameOfLife::GameOfLife() : QQuickImageProvider(QQuickImageProvider::Pixmap)
 {
     _game_state.fill(Qt::black);
 }
 
+/**
+ * @brief Game of life function, gets next state from image request
+ * @details Parses the ID string and acts accordingly. First char 'r' is run, 's' is change size, 'p' is set point. Additional parameters such as size in numbers or point coordinates come immediately after the first command character.
+ * @param id
+ * @param size
+ * @param requestedSize
+ * @return Pixel map of the game state
+ */
 QPixmap GameOfLife::requestPixmap(const QString &id, QSize *size, const QSize &requestedSize)
 {
     if (!id.isEmpty()){
         // Run the game
         if (id.at(0) == 'r')
         {
-            // To modify pixels in bitmap, we'll need to handle it as QImage
+            // To modify pixels in bitmap, we'll need to handle it as QImage.
+            // REFACTOR TODO: Keep a QImage, not QBitmap in this class to avoid unnecessary conversions
             QImage game_image = _game_state.toImage();
 
             // We'll need to raise/die all at the same time, thus just iterating through while making pixels alive doesn't work.
@@ -74,10 +86,12 @@ QPixmap GameOfLife::requestPixmap(const QString &id, QSize *size, const QSize &r
 
             _game_state = QBitmap::fromImage(game_image);
         }
+        // REFACTOR TODO: No need for the x portion, the sizes are always squares.
         // Change size
         else if(id.at(0) == 's')
         {
             QStringList sizes = id.split('x');
+            qInfo() << "Setting size" << sizes;
             _game_state = QBitmap(sizes.at(0).mid(1).toInt(), sizes.at(1).toInt());
             _game_state.fill(Qt::black);
         }
@@ -85,12 +99,15 @@ QPixmap GameOfLife::requestPixmap(const QString &id, QSize *size, const QSize &r
         else if(id.at(0) == 'p')
         {
             QStringList point = id.split('x');
-            int x = point.at(0).mid(1).toInt();
-            int y = point.at(1).toInt();
+            int x = point.at(0).mid(1).toInt()*(_game_state.width()/435.0);
+            int y = point.at(1).toInt()*(_game_state.height()/435.0);
+
+            qInfo() << "Point" << x << "x" << y;
+            qInfo() << "From" << id;
+            qInfo() << "Size" << _game_state.size();
+
             // To modify pixels in bitmap, we'll need to handle it as QImage
             QImage game_image = _game_state.toImage();
-            qInfo() << game_image.colorTable();
-            qInfo() << game_image.pixel(x, y);
             if (game_image.pixel(x, y) == qRgb(0xff, 0xff, 0xff))
                 game_image.setPixel(x, y, 1);
             else
