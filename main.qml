@@ -101,4 +101,32 @@ Window {
         text: qsTr("Size: 1x1")
         font.pixelSize: 12
     }
+
+    Slider {
+        id: delaySlider
+        x: 515
+        y: 96
+        width: 150
+        height: 10
+        snapMode: RangeSlider.SnapOnRelease
+        stepSize: 1
+        to: 999
+        from: 1
+        transformOrigin: Item.Center
+        rotation: 270
+        value: 200
+        onMoved:
+        {
+            delayText.text = "Step delay: " + this.value + "ms";
+            gameTimer.interval = this.value;
+        }
+    }
+
+    Text {
+        id: delayText
+        x: 543
+        y: 4
+        text: qsTr("Step delay: 200ms")
+        font.pixelSize: 12
+    }
 }

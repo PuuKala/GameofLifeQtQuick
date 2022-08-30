@@ -11,15 +11,15 @@ GameOfLife::GameOfLife() : QQuickImageProvider(QQuickImageProvider::Image)
 /**
  * @brief Game of life function, gets next state from image request
  * @details Parses the ID string and acts accordingly. First char 'r' is run, 's' is change size, 'p' is set point. Additional parameters such as size in numbers or point coordinates come immediately after the first command character.
- * @param id
- * @param size
- * @param requestedSize
+ * @param id Request string to parse
+ * @param size Handled by Qt, not used here
+ * @param requestedSize Handled by Qt, not used here
  * @return Monochrome image of the game state
  */
 QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
     if (!id.isEmpty()){
-        // Run the game, id format "r", no parameters needed or handled
+        // Run the game, id string format "r", no parameters needed or handled
         if (id.at(0) == 'r')
         {
             // We'll need to raise/die all at the same time, thus just iterating through while making pixels alive doesn't work.
@@ -34,7 +34,7 @@ QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &req
                     unsigned char neighbours = 0;
                     for (int neighbour_x = -1; neighbour_x <= 1; ++neighbour_x) {
 
-                        // REFACTOR IDEA: Check for null instead of out of bound coordinates. Out-of-bounds if-clauses should be more inefficient than null checking.
+                        // REFACTOR IDEA: We could just remove out of bounds checks and ignore the warning prints, not sure which way is more efficient.
                         // Skipping out of bounds neighbours
                         if (pixel_x == 0 && neighbour_x == -1)
                             continue;
@@ -78,20 +78,19 @@ QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &req
             for(const std::pair<unsigned, unsigned> coord : to_die)
                 _game_state_image.setPixel(coord.first, coord.second, 0);
         }
-        // Change size, id format "snnn", with 'n' as a number
+        // Change size, id string format "snnn", with 'n' as a number
         else if(id.at(0) == 's')
         {
             _game_state_image = QImage(id.mid(1).toInt(), id.mid(1).toInt(), QImage::Format_Mono);
             _game_state_image.fill(0);
         }
-        // Set a point, id format "pnnnxmmm" with 'n' and 'm' as numbers
+        // Set a point, id string format "pnnnxmmm" with 'n' and 'm' as numbers
         else if(id.at(0) == 'p')
         {
             QStringList point = id.split('x');
-            int x = point.at(0).mid(1).toInt()*(_game_state_image.width()/435.0);
-            int y = point.at(1).toInt()*(_game_state_image.height()/435.0);
+            int x = point.at(0).mid(1).toInt()*(_game_state_image.width()/_GUI_image_size);
+            int y = point.at(1).toInt()*(_game_state_image.height()/_GUI_image_size);
 
-            // To modify pixels in bitmap, we'll need to handle it as QImage
             if (_game_state_image.pixel(x, y) == qRgb(0xff, 0xff, 0xff))
                 _game_state_image.setPixel(x, y, 0);
             else
