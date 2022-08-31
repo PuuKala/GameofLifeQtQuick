@@ -14,6 +14,8 @@ public:
 private:
     QImage _game_state_image = QImage(1, 1, QImage::Format_Mono);
     const float _GUI_image_size = 435; // Float, as we want to use float division
+
+    void _run_game();
 };
 
 #endif // GAMEOFLIFE_H
