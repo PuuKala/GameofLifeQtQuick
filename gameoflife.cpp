@@ -34,7 +34,9 @@ QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &req
                     unsigned char neighbours = 0;
                     for (int neighbour_x = -1; neighbour_x <= 1; ++neighbour_x) {
 
-                        // REFACTOR IDEA: We could just remove out of bounds checks and ignore the warning prints, not sure which way is more efficient.
+                        // REFACTOR IDEA: We could just remove out of bounds checks and ignore the warning prints. I think it would be more computationally efficient way.
+                        // It's not the cleanest solution though due to a flood of out of bounds warnings from the QImage class.
+
                         // Skipping out of bounds neighbours
                         if (pixel_x == 0 && neighbour_x == -1)
                             continue;
