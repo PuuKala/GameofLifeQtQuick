@@ -5,6 +5,7 @@
  */
 GameOfLife::GameOfLife() : QQuickImageProvider(QQuickImageProvider::Image)
 {
+    // Fill image with black
     _game_state_image.fill(0);
 }
 
@@ -18,6 +19,7 @@ GameOfLife::GameOfLife() : QQuickImageProvider(QQuickImageProvider::Image)
  */
 QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
+    // If id string is empty, skip the handling and return current state
     if (!id.isEmpty()){
 
         // Run the game, id string format "r", no parameters needed or handled
@@ -27,7 +29,17 @@ QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &req
         // Change size, id string format "snnn", with 'n' as a number
         else if(id.at(0) == 's')
         {
-            _game_state_image = QImage(id.mid(1).toInt(), id.mid(1).toInt(), QImage::Format_Mono);
+            unsigned int new_size = id.mid(1).toUInt();
+
+            // Size of 0 image cannot be plaid or shown.
+            // Also, in case of NaN, new_size will be 0.
+            if (new_size == 0)
+            {
+                qWarning() << __FILE__ << __LINE__ << ":" << "Incorrect size setting with string:" << id;
+                return _game_state_image;
+            }
+
+            _game_state_image = QImage(new_size, new_size, QImage::Format_Mono);
             _game_state_image.fill(0);
         }
 
@@ -35,16 +47,23 @@ QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &req
         else if(id.at(0) == 'p')
         {
             QStringList point = id.split('x');
+            if (point.size() != 2) // Prevent crash from string missing 'x'
+            {
+                qWarning() << __FILE__ << __LINE__ << ":" << "Incorrect point set with string:" << id;
+                return _game_state_image;
+            }
 
             // GUI coordinates scaled to _game_state_image size coordinates
-            int x = point.at(0).mid(1).toInt()*(_game_state_image.width()/_GUI_image_size);
-            int y = point.at(1).toInt()*(_game_state_image.height()/_GUI_image_size);
+            int x = point.at(0).mid(1).toUInt()*(_game_state_image.width()/_GUI_image_size);
+            int y = point.at(1).toUInt()*(_game_state_image.height()/_GUI_image_size);
 
             if (_game_state_image.pixel(x, y) == qRgb(0xff, 0xff, 0xff))
                 _game_state_image.setPixel(x, y, 0);
             else
                 _game_state_image.setPixel(x, y, 1);
         }
+        else
+            qWarning() << __FILE__ << __LINE__ << ":" << "Incorrect command in string:" << id;
     }
     return _game_state_image;
 }
@@ -53,7 +72,7 @@ QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &req
 //// PRIVATE FROM HERE ONWARDS ////
 ///////////////////////////////////
 
-// Run game function separated from the "main" requestImage function for clarity
+// Run game function separated from the requestImage function for clarity
 inline void GameOfLife::_run_game()
 {
     // We'll need to raise/die all at the same time, thus just iterating through while making pixels alive doesn't work.
