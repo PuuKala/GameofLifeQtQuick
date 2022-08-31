@@ -89,7 +89,7 @@ Window {
         value: 1
         onMoved:
         {
-            sizeText.text = "Size: " + this.value + "x" + this.value;
+            sizeText.text = "Size:" + this.value + "x" + this.value;
             gameOfLifeImage.source = "image://gameoflife/s" + this.value;
         }
     }
@@ -98,7 +98,7 @@ Window {
         id: sizeText
         x: 565
         y: 449
-        text: qsTr("Size: 1x1")
+        text: qsTr("Size:1x1")
         font.pixelSize: 12
     }
 
@@ -117,16 +117,16 @@ Window {
         value: 200
         onMoved:
         {
-            delayText.text = "Step delay: " + this.value + "ms";
+            delayText.text = "Step delay:" + this.value + "ms";
             gameTimer.interval = this.value;
         }
     }
 
     Text {
         id: delayText
-        x: 543
+        x: 541
         y: 4
-        text: qsTr("Step delay: 200ms")
+        text: qsTr("Step delay:200ms")
         font.pixelSize: 12
     }
 }
