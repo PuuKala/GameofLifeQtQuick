@@ -32,7 +32,7 @@ QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &req
             unsigned int new_size = id.mid(1).toUInt();
 
             // Size of 0 image cannot be plaid or shown.
-            // Also, in case of NaN, new_size will be 0.
+            // Also, in case of NaN or other failed uint conversion, new_size will be 0.
             if (new_size == 0)
             {
                 qWarning() << __FILE__ << __LINE__ << ":" << "Incorrect size setting with string:" << id;
@@ -47,15 +47,27 @@ QImage GameOfLife::requestImage(const QString &id, QSize *size, const QSize &req
         else if(id.at(0) == 'p')
         {
             QStringList point = id.split('x');
-            if (point.size() != 2) // Prevent crash from string missing 'x'
+            if (point.size() != 2) // Prevent crash from string missing splitting point 'x'
             {
-                qWarning() << __FILE__ << __LINE__ << ":" << "Incorrect point set with string:" << id;
+                qWarning() << __FILE__ << __LINE__ << ":" << "No splitting point found in string:" << id;
                 return _game_state_image;
             }
 
             // GUI coordinates scaled to _game_state_image size coordinates
-            int x = point.at(0).mid(1).toUInt()*(_game_state_image.width()/_GUI_image_size);
-            int y = point.at(1).toUInt()*(_game_state_image.height()/_GUI_image_size);
+            // In case of failed uint conversion, the coordinates become 0. We'll want to prevent any action in that case and thus we're checking the ok flag from the conversion function.
+            bool ok;
+            int x = point.at(0).mid(1).toUInt(&ok)*(_game_state_image.width()/_GUI_image_size);
+            if (!ok)
+            {
+                qWarning() << __FILE__ << __LINE__ << ":" << "Incorrect point set with string:" << id;
+                return _game_state_image;
+            }
+            int y = point.at(1).toUInt(&ok)*(_game_state_image.height()/_GUI_image_size);
+            if (!ok)
+            {
+                qWarning() << __FILE__ << __LINE__ << ":" << "Incorrect point set with string:" << id;
+                return _game_state_image;
+            }
 
             if (_game_state_image.pixel(x, y) == qRgb(0xff, 0xff, 0xff))
                 _game_state_image.setPixel(x, y, 0);
